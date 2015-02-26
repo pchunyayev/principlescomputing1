@@ -58,18 +58,44 @@ class TwentyFortyEight:
     def __init__(self, grid_height, grid_width):
         self._grid_height = grid_height
         self._grid_width = grid_width
+        self.create_initial_tiles()
+        self._cells = [ [(row, col) for col in range(grid_width)] for row in range(grid_height)]
         self.reset()
-
+        
+    def create_initial_tiles(self):
+        """
+        Creates the dictionary of initial tiles
+        for all directions
+        """
+        up_tiles = []
+        down_tiles = []
+        left_tiles = []
+        right_tiles = []
+        for col in range(self._grid_width):
+            up_tiles.append((0, col))
+            down_tiles.append((self._grid_height-1, col))
+        for row in range(self._grid_height):
+            left_tiles.append((row, 0))
+            right_tiles.append((row, self._grid_width-1))
+        
+        self._initial_tiles = {UP: up_tiles, DOWN: down_tiles, 
+                              LEFT: left_tiles, RIGHT: right_tiles}
+        
+    def get_initial_tiles(self, direction):
+        """
+        Returns initial tiles dictionary
+        """
+        return self._initial_tiles[direction]
+    
     def reset(self):
         """
         Reset the game so the grid is empty except for two
         initial tiles.
         """
         self._board = []
-        for row in range(self._grid_height):
+        for _ in range(self._grid_height):
             reset_row = [0] * self._grid_width
             self._board.append(reset_row)
-            row += 1
         self.new_tile()
         self.new_tile()
 
@@ -77,7 +103,6 @@ class TwentyFortyEight:
         """
         Return a string representation of the grid for debugging.
         """
-        # replace with your code
         return str(self._board)
 
     def get_grid_height(self):
@@ -92,14 +117,38 @@ class TwentyFortyEight:
         """
         return self._grid_width
 
+    def check_tile(self, tile):
+        """ 
+        Check if the cell id exists
+        """
+        for row in self._cells:
+            if tile in row:
+                return True
+        return False
+    
     def move(self, direction):
         """
         Move all tiles in the given direction and add
         a new tile if any tiles moved.
         """
-        # replace with your code
-        pass
-
+        moved_flag = False
+        offset = OFFSETS[direction]
+        for initial_tile in self._initial_tiles[direction]:
+            line = []
+            tiles = []
+            current_tile = initial_tile
+            while self.check_tile(current_tile):
+                tiles.append(current_tile)
+                line.append(self.get_tile(current_tile[0], current_tile[1]))
+                current_tile = tuple([x + y for x, y in zip(current_tile, offset)])
+            new_line = merge(line)
+            if new_line != line:
+                moved_flag = True
+                for index, cell in enumerate(tiles):
+                    self.set_tile(cell[0], cell[1], new_line[index])
+        if moved_flag:
+            self.new_tile()
+                
     def new_tile(self):
         """
         Create a new tile in a randomly selected empty
@@ -135,7 +184,7 @@ class TwentyFortyEight:
         """
         return self._board[row][col]
 
-#import user39_7p5exTFbTowuChb_2 as twenty48_testsuite
+#import user39_F508CjVrWS_6 as twenty48_testsuite
 #twenty48_testsuite.test_class(TwentyFortyEight)
 
-#poc_2048_gui.run_gui(TwentyFortyEight(4, 4))
+#poc_2048_gui.run_gui(TwentyFortyEight(3, 4))
